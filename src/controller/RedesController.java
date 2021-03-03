@@ -14,6 +14,7 @@ public class RedesController {
 
     public void ip(String operationalSystem) {
         if (operationalSystem.equals("Windows 10")) windowsIp();
+        if (operationalSystem.equals("Linux")) linuxIp();
     }
 
     private String call(String process) {
@@ -48,6 +49,11 @@ public class RedesController {
 
     private void windowsIp() {
         var ipconfig = call("ipconfig");
+        System.out.println(ipconfig);
+    }
+
+    private void linuxIp() {
+        var ipconfig = call("ifconfig");
         System.out.println(ipconfig);
     }
 }
