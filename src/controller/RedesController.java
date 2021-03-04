@@ -94,7 +94,25 @@ public class RedesController {
 
     private String linuxIp() {
         var ipconfig = call("ifconfig");
-        return ipconfig;
+        return ipconfig
+            .lines()
+            .filter(
+                line ->
+                    (line.startsWith("e") && line.contains("flags")) ||
+                    line.contains("inet ")
+            )
+            .reduce(
+                "",
+                (text, line) -> {
+                    if ((matchEndIpv4(text) && matchEndIpv4(line))) return text;
+                    if (line.contains(":")) {
+                        return text + line.split(":")[0] + ": ";
+                    }
+
+                    var parts = line.trim().split(" ");
+                    return text + parts[1] + "\n";
+                }
+            );
     }
 
     public void ping(String operationalSystem) {
