@@ -25,13 +25,12 @@ public class RedesController {
         return isSystem("Linux", operationalSystem);
     }
 
-    public void ip(String operationalSystem) {
-        String adaptersAndIps = "";
+    private boolean matchEnd(String pattern, String text) {
+        return Pattern.compile(pattern).matcher(text).find();
+    }
 
-        if (isWindows(operationalSystem)) adaptersAndIps = windowsIp();
-        if (isLinux(operationalSystem)) adaptersAndIps = linuxIp();
-
-        System.out.println(adaptersAndIps);
+    private boolean matchEndIpv4(String text) {
+        return matchEnd("[0-9]$", text);
     }
 
     private String call(String process) {
@@ -45,7 +44,9 @@ public class RedesController {
 
             while (line != null) {
                 line = buffer.readLine();
-                result.append(line).append('\n');
+                if (line != null) {
+                    result.append(line).append('\n');
+                }
             }
 
             stream.close();
@@ -64,12 +65,13 @@ public class RedesController {
         return "";
     }
 
-    private boolean matchEnd(String pattern, String text) {
-        return Pattern.compile(pattern).matcher(text).find();
-    }
+    public void ip(String operationalSystem) {
+        String adaptersAndIps = "";
 
-    private boolean matchEndIpv4(String text) {
-        return matchEnd("[0-9]$", text);
+        if (isWindows(operationalSystem)) adaptersAndIps = windowsIp();
+        if (isLinux(operationalSystem)) adaptersAndIps = linuxIp();
+
+        System.out.println(adaptersAndIps);
     }
 
     private String windowsIp() {
@@ -78,15 +80,41 @@ public class RedesController {
             .filter(line -> line.contains("Ethernet") || line.contains("IPv4"))
             .reduce(
                 "",
-                (output, line) ->
-                    (matchEndIpv4(output) && matchEndIpv4(line))
-                        ? output
-                        : output + line + "\n"
+                (text, line) -> {
+                    if (matchEndIpv4(text) && matchEndIpv4(line)) return text;
+                    if (matchEndIpv4(line)) {
+                        var ipv4 = line.split(":")[1];
+                        return text + ipv4 + "\n";
+                    }
+
+                    return text + line;
+                }
             );
     }
 
     private String linuxIp() {
         var ipconfig = call("ifconfig");
         return ipconfig;
+    }
+
+    public void ping(String operationalSystem) {
+        String average = "";
+
+        if (isWindows(operationalSystem)) average = windowsPing();
+        if (isLinux(operationalSystem)) average = linuxPing();
+
+        System.out.println(average);
+    }
+
+    public String windowsPing() {
+        var ping = call("ping -4 -n 10 www.google.com.br").trim().split("\n");
+        var infos = ping[ping.length - 1].split("= ");
+        return infos[infos.length - 1];
+    }
+
+    public String linuxPing() {
+        var ping = call("ping -4 -c 10 www.google.com.br").trim().split("\n");
+        var infos = ping[ping.length - 1].split("/");
+        return infos[infos.length - 1];
     }
 }

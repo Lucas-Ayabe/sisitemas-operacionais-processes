@@ -8,6 +8,7 @@ public class Main {
         var controller = new RedesController();
         var operationalSystem = System.getProperty("os.name");
         System.out.println(operationalSystem);
-        controller.ip(operationalSystem);
+        // controller.ip(operationalSystem);
+        controller.ping(operationalSystem);
     }
 }
