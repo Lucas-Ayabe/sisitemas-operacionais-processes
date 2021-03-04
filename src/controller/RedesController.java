@@ -93,8 +93,7 @@ public class RedesController {
     }
 
     private String linuxIp() {
-        var ipconfig = call("ifconfig");
-        return ipconfig
+        return call("ifconfig")
             .lines()
             .filter(
                 line ->
