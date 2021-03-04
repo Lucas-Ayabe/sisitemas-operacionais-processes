@@ -31,7 +31,7 @@ public class Main {
                     System.out.println("Opção inválida, tente novamente :(");
                     break;
             }
-            System.out.println("\n========\n1");
+            System.out.println("\n========\n");
         } while (option != 0);
     }
 }
